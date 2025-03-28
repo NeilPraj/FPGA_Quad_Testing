@@ -1,10 +1,11 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.numeric_std.all;
 
 entity quadrature_decoder is
     generic(
-        positions                 : integer := 24;
-        debounce_time             : integer := 25_000;
+        positions                 : integer := 128;
+        debounce_time             : integer := 50_000;
         set_origin_debounce_time  : integer := 500_000
     );
     port(
@@ -13,7 +14,8 @@ entity quadrature_decoder is
         b           : in  std_logic;
         reset_pos   : in  std_logic;
         direction   : out std_logic;
-        position    : out integer range 0 to positions - 1;		  
+        position    : out integer range 0 to positions - 1;
+		position_leds : out std_logic_vector(6 downto 0)	
     );
 end quadrature_decoder;
 
@@ -29,6 +31,8 @@ architecture logic of quadrature_decoder is
     signal reset_count           : integer range 0 to set_origin_debounce_time := 0;
     signal debounce_cnt          : integer range 0 to debounce_time := 0;
     signal pos_reg               : integer range 0 to positions - 1 := 0;
+	 
+	 signal pos_vec : std_logic_vector(6 downto 0); 
 
 begin
 
@@ -101,5 +105,9 @@ begin
 
         end if;
     end process;
+
+    -- Combinational logic to convert position to LED output
+    pos_vec <= std_logic_vector(to_unsigned(pos_reg, 7));
+    position_leds <= pos_vec;
 
 end logic;
